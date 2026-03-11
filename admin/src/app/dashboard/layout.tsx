@@ -20,6 +20,7 @@ import {
   Sparkles,
   Settings,
   FileText,
+  TrendingUp,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -28,6 +29,7 @@ import {
 
 const navLinks: { href: string; label: string; icon: LucideIcon }[] = [
   { href: '/dashboard',           label: 'Overview',     icon: BarChart3 },
+  { href: '/dashboard/analytics', label: 'Analytics',    icon: TrendingUp },
   { href: '/dashboard/users',     label: 'Users',        icon: Users     },
   { href: '/dashboard/websites',  label: 'Websites',     icon: Layout    },
   { href: '/dashboard/domains',   label: 'Domains',      icon: Globe     },

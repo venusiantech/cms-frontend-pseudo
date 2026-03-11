@@ -525,7 +525,7 @@ export default function AiProviderPage() {
               currentProvider={data?.current[task] ?? 'aaddyy'}
               availableProviders={data?.availableProviders ?? []}
               providerStatus={data?.status ?? {}}
-              models={data?.models}
+              models={data?.models ?? {}}
               isSaving={savingTask === task}
               onSelectProvider={(provider) => handleProviderChange(task, provider)}
               onSelectModel={handleModelChange}

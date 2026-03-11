@@ -4,11 +4,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   FASTOFY ADMIN THEME - Dark Mode with Neon Accents
+   FASTOFY ADMIN THEME - Dark Mode with Neon Lime Accents
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Background colors */
+  /* Always dark mode */
   --background: #0a0a0a;
   --foreground: #ffffff;
   --card: #0d0d0d;
@@ -61,24 +61,25 @@
   /* Typography */
   --font-sans: Inter, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
+  --font-serif: ui-serif, Georgia, serif;
   
   /* Radius */
   --radius: 0.75rem;
   
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-2xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
   
-  /* Glow effects */
-  --glow-primary: 0 0 20px rgba(218, 255, 1, 0.15);
-  --glow-success: 0 0 20px rgba(52, 211, 153, 0.15);
-  --glow-error: 0 0 20px rgba(239, 68, 68, 0.15);
+  /* Tracking */
+  --tracking-normal: 0.025em;
 }
 
-/* Keep dark as default (no light mode) */
 .dark {
   /* Same as root - always dark */
 }
@@ -119,29 +120,39 @@
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);
   --shadow: var(--shadow);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
-  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
-
+  
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
@@ -163,225 +174,37 @@
 }
 
 @layer components {
-  /* ─── Buttons ─────────────────────────────────────────────────────────────── */
-  
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200;
-    background: var(--primary);
-    color: var(--primary-foreground);
-  }
-  
-  .btn-primary:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-    box-shadow: var(--glow-primary);
-  }
-  
-  .btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
+      bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
-    background: var(--secondary);
-    color: var(--secondary-foreground);
-    border: 1px solid var(--border);
-  }
-  
-  .btn-secondary:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+      bg-secondary text-secondary-foreground border border-border hover:border-primary hover:text-primary disabled:opacity-50;
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
-    background: var(--destructive);
-    color: var(--destructive-foreground);
-  }
-  
-  .btn-danger:hover {
-    opacity: 0.9;
-    box-shadow: var(--glow-error);
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+      bg-destructive text-destructive-foreground hover:opacity-90 disabled:opacity-50;
   }
 
-  /* ─── Input Fields ────────────────────────────────────────────────────────── */
-  
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl text-sm transition-all duration-200;
-    background: var(--input);
-    border: 1px solid var(--border);
-    color: var(--foreground);
-  }
-  
-  .input-field::placeholder {
-    color: var(--muted-foreground);
-  }
-  
-  .input-field:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(218, 255, 1, 0.1);
+    @apply w-full px-4 py-3 rounded-xl border border-border bg-input text-foreground
+      text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary transition-all;
   }
 
-  /* ─── Cards ───────────────────────────────────────────────────────────────── */
-  
   .card {
-    @apply rounded-2xl p-6;
-    background: var(--card);
-    border: 1px solid var(--border);
-  }
-  
-  .card-hover {
-    @apply card transition-all duration-200;
-  }
-  
-  .card-hover:hover {
-    border-color: rgba(218, 255, 1, 0.3);
-    box-shadow: var(--glow-primary);
+    @apply bg-card text-card-foreground border border-border rounded-2xl p-6;
   }
 
-  /* ─── Badges ──────────────────────────────────────────────────────────────── */
-  
   .badge {
     @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
   }
-  
-  .badge-green {
-    background: rgba(52, 211, 153, 0.15);
-    color: rgb(52, 211, 153);
-    border: 1px solid rgba(52, 211, 153, 0.25);
-  }
-  
-  .badge-red {
-    background: rgba(239, 68, 68, 0.15);
-    color: rgb(239, 68, 68);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-  }
-  
-  .badge-yellow {
-    background: rgba(250, 204, 21, 0.15);
-    color: rgb(250, 204, 21);
-    border: 1px solid rgba(250, 204, 21, 0.25);
-  }
-  
-  .badge-blue {
-    background: rgba(56, 189, 248, 0.15);
-    color: rgb(56, 189, 248);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-  }
-  
-  .badge-purple {
-    background: rgba(167, 139, 250, 0.15);
-    color: rgb(167, 139, 250);
-    border: 1px solid rgba(167, 139, 250, 0.25);
-  }
-  
-  .badge-primary {
-    background: rgba(218, 255, 1, 0.15);
-    color: rgb(218, 255, 1);
-    border: 1px solid rgba(218, 255, 1, 0.25);
-  }
-
-  /* ─── Tables ──────────────────────────────────────────────────────────────── */
-  
-  .table-row {
-    @apply border-b border-border transition-colors;
-  }
-  
-  .table-row:hover {
-    background: rgba(218, 255, 1, 0.02);
-  }
-  
-  .table-cell {
-    @apply px-4 py-3 text-sm;
-  }
-
-  /* ─── Stat Cards ──────────────────────────────────────────────────────────── */
-  
-  .stat-card {
-    @apply rounded-2xl p-5 transition-all duration-200;
-    background: var(--card);
-    border: 1px solid var(--border);
-  }
-  
-  .stat-card:hover {
-    border-color: rgba(218, 255, 1, 0.3);
-    transform: translateY(-2px);
-  }
-
-  /* ─── Glow Effects ────────────────────────────────────────────────────────── */
-  
-  .glow-primary {
-    box-shadow: var(--glow-primary);
-  }
-  
-  .glow-success {
-    box-shadow: var(--glow-success);
-  }
-  
-  .glow-error {
-    box-shadow: var(--glow-error);
-  }
-
-  /* ─── Spotlight Effect ────────────────────────────────────────────────────── */
-  
-  .spotlight {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .spotlight::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(218, 255, 1, 0.06),
-      transparent 40%
-    );
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  .spotlight:hover::before {
-    opacity: 1;
-  }
-}
-
-/* ─── Animations ────────────────────────────────────────────────────────────── */
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 10px rgba(218, 255, 1, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(218, 255, 1, 0.4);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(218, 255, 1, 0.1) 50%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  .badge-green  { @apply bg-emerald-500/15 text-emerald-400 border border-emerald-500/25; }
+  .badge-red    { @apply bg-red-500/15 text-red-400 border border-red-500/25; }
+  .badge-yellow { @apply bg-amber-500/15 text-amber-400 border border-amber-500/25; }
+  .badge-blue   { @apply bg-sky-500/15 text-sky-400 border border-sky-500/25; }
+  .badge-purple { @apply bg-violet-500/15 text-violet-400 border border-violet-500/25; }
+  .badge-primary { @apply bg-primary/15 text-primary border border-primary/25; }
 }

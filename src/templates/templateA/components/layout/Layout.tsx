@@ -1,0 +1,92 @@
+"use client";
+import { useEffect, useState } from "react";
+import BackToTop from "../elements/BackToTop";
+import Footer from "./footer/Footer";
+import Header from "./header/Header";
+import MobileMenu from "./MobileMenu";
+
+
+interface LayoutProps {
+  children?: React.ReactNode;
+  classLisst?: string;
+  siteName?: string;
+  logoUrl?: string | null;
+  logoDisplayMode?: string | null;
+  assetsPath?: string;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  twitterUrl?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  onContactClick?: () => void; // Optional contact click handler
+}
+
+export default function Layout({ classLisst, children, siteName = 'Site', logoUrl, logoDisplayMode, assetsPath = '/templateA/assets', instagramUrl, facebookUrl, twitterUrl, contactEmail, contactPhone, onContactClick }: LayoutProps) {
+  const [scroll, setScroll] = useState<boolean>(false);
+  // Mobile Menu
+  const [isMobileMenu, setMobileMenu] = useState<boolean>(false);
+  const handleMobileMenu = (): void => {
+    setMobileMenu(!isMobileMenu);
+    !isMobileMenu ? document.body.classList.add("mobile-menu-active") : document.body.classList.remove("mobile-menu-active");
+  };
+
+  useEffect(() => {
+    const handleScroll = (): void => {
+      const scrollCheck: boolean = window.scrollY > 100;
+      if (scrollCheck !== scroll) {
+        setScroll(scrollCheck);
+      }
+    };
+
+    document.addEventListener("scroll", handleScroll);
+
+    return () => {
+      document.removeEventListener("scroll", handleScroll);
+    };
+  }, [scroll]);
+
+  return (
+    <>
+      <div className={classLisst}>
+        <MobileMenu 
+          isMobileMenu={isMobileMenu} 
+          handleMobileMenu={handleMobileMenu} 
+          siteName={siteName} 
+          assetsPath={assetsPath}
+          instagramUrl={instagramUrl}
+          facebookUrl={facebookUrl}
+          twitterUrl={twitterUrl}
+        />
+        <div id="wrapper">
+          <Header 
+            scroll={scroll} 
+            siteName={siteName}
+            logoUrl={logoUrl}
+            logoDisplayMode={logoDisplayMode}
+            assetsPath={assetsPath}
+            instagramUrl={instagramUrl}
+            facebookUrl={facebookUrl}
+            twitterUrl={twitterUrl}
+            onContactClick={onContactClick}
+          />
+
+          <main id="content">
+            {children}
+          </main>
+
+          <Footer 
+            siteName={siteName} 
+            instagramUrl={instagramUrl || undefined}
+            facebookUrl={facebookUrl || undefined}
+            twitterUrl={twitterUrl || undefined}
+            contactEmail={contactEmail || undefined}
+            contactPhone={contactPhone || undefined}
+            onContactClick={onContactClick}
+          />
+
+          <BackToTop />
+        </div>
+      </div>
+    </>
+  );
+}

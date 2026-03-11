@@ -1,0 +1,342 @@
+import { Router } from 'express';
+import { body, param, query } from 'express-validator';
+import { validate } from '../middleware/validation.middleware';
+import { asyncHandler } from '../middleware/error.middleware';
+import { authenticate, AuthRequest } from '../middleware/auth.middleware';
+import { DomainsService } from './domains.service';
+
+const router = Router();
+const domainsService = new DomainsService();
+
+// All routes require authentication
+router.use(authenticate);
+
+/**
+ * @swagger
+ * /domains:
+ *   post:
+ *     tags: [Domains]
+ *     summary: Register new domain
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               domainName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Domain created
+ */
+router.post(
+  '/',
+  validate([
+    body('domainName')
+      .isString()
+      .notEmpty()
+      .withMessage('Domain name is required')
+      .matches(/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/)
+      .withMessage('Invalid domain format. Must include a valid TLD (e.g., example.com)'),
+  ]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const domain = await domainsService.create(req.user!.id, req.body);
+    res.json(domain);
+  })
+);
+
+/**
+ * @swagger
+ * /domains:
+ *   get:
+ *     tags: [Domains]
+ *     summary: Get all domains (filtered by user)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of domains
+ */
+router.get(
+  '/',
+  asyncHandler(async (req: AuthRequest, res) => {
+    const domains = await domainsService.findAll(req.user!.id, req.user!.role);
+    res.json(domains);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/search:
+ *   get:
+ *     tags: [Domains]
+ *     summary: Search domains by name
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Search query (partial domain name match)
+ *     responses:
+ *       200:
+ *         description: Matching domains
+ */
+router.get(
+  '/search',
+  validate([
+    query('q')
+      .isString()
+      .notEmpty()
+      .withMessage('Search query is required')
+      .isLength({ max: 100 })
+      .withMessage('Query too long'),
+  ]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const results = await domainsService.search(
+      req.user!.id,
+      req.user!.role,
+      req.query.q as string
+    );
+    res.json(results);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}:
+ *   get:
+ *     tags: [Domains]
+ *     summary: Get domain by ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Domain details
+ */
+router.get(
+  '/:id',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const domain = await domainsService.findOne(
+      req.params.id,
+      req.user!.id,
+      req.user!.role
+    );
+    res.json(domain);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}:
+ *   put:
+ *     tags: [Domains]
+ *     summary: Update domain
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, ACTIVE]
+ *               selectedMeaning:
+ *                 type: string
+ *               userDescription:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Domain updated
+ */
+router.put(
+  '/:id',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const domain = await domainsService.update(
+      req.params.id,
+      req.user!.id,
+      req.user!.role,
+      req.body
+    );
+    res.json(domain);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}:
+ *   delete:
+ *     tags: [Domains]
+ *     summary: Delete domain
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Domain deleted
+ */
+router.delete(
+  '/:id',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const result = await domainsService.delete(
+      req.params.id,
+      req.user!.id,
+      req.user!.role
+    );
+    res.json(result);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}/synonyms:
+ *   get:
+ *     tags: [Domains]
+ *     summary: Get synonyms and meanings for domain name
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Synonyms and meanings
+ */
+router.get(
+  '/:id/synonyms',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const result = await domainsService.getSynonyms(
+      req.params.id,
+      req.user!.id,
+      req.user!.role
+    );
+    res.json(result);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}/dns-status:
+ *   get:
+ *     tags: [Domains]
+ *     summary: Check DNS status from Cloudflare
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: DNS status
+ */
+router.get(
+  '/:id/dns-status',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const result = await domainsService.checkDnsStatus(
+      req.params.id,
+      req.user!.id,
+      req.user!.role
+    );
+    res.json(result);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}/retry-cloudflare:
+ *   post:
+ *     tags: [Domains]
+ *     summary: Retry Cloudflare DNS zone creation for failed domains
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Cloudflare setup completed
+ */
+router.post(
+  '/:id/retry-cloudflare',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const result = await domainsService.retryCloudflareSetup(
+      req.params.id,
+      req.user!.id,
+      req.user!.role
+    );
+    res.json(result);
+  })
+);
+
+/**
+ * @swagger
+ * /domains/{id}/deploy-workers:
+ *   post:
+ *     tags: [Domains]
+ *     summary: Deploy Cloudflare Workers for domain (root + www)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Worker domains deployed
+ */
+router.post(
+  '/:id/deploy-workers',
+  validate([param('id').isUUID().withMessage('Invalid domain ID')]),
+  asyncHandler(async (req: AuthRequest, res) => {
+    const result = await domainsService.deployWorkerDomains(
+      req.params.id,
+      req.user!.id,
+      req.user!.role
+    );
+    res.json(result);
+  })
+);
+
+export default router;

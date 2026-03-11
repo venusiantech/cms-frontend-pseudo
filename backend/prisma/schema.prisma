@@ -1,0 +1,395 @@
+// Prisma Schema for Multi-Tenant Domain CMS Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 1️⃣ USERS TABLE
+// ============================================
+model User {
+  id                        String   @id @default(uuid())
+  email                     String   @unique
+  passwordHash              String   @map("password_hash")
+  role                      UserRole @default(USER)
+  name                      String?
+  firstName                 String?  @map("first_name")
+  lastName                  String?  @map("last_name")
+  mobileNumber              String?  @map("mobile_number")
+  dateOfBirth               String?  @map("date_of_birth")
+  emailNotificationsEnabled Boolean  @default(true) @map("email_notifications_enabled")
+  notificationEmails        String[] @default([]) @map("notification_emails")
+  createdAt                 DateTime @default(now()) @map("created_at")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  domains             Domain[]
+  regenerationLogs    RegenerationLog[]
+  subscription        UserSubscription?
+  creditLedger        CreditLedger[]
+  paymentRecords      PaymentRecord[]
+  customPlanRequests  CustomPlanRequest[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  USER
+}
+
+// ============================================
+// 2️⃣ DOMAINS TABLE
+// ============================================
+model Domain {
+  id                String       @id @default(uuid())
+  userId            String       @map("user_id")
+  domainName        String       @unique @map("domain_name")
+  status            DomainStatus @default(PENDING)
+  selectedMeaning   String?      @map("selected_meaning") @db.Text // Stores user's selected meaning/context
+  userDescription   String?      @map("user_description") @db.Text // User's custom description about what the domain is about
+  cloudflareZoneId  String?      @map("cloudflare_zone_id") // Cloudflare Zone ID
+  cloudflareStatus  String?      @map("cloudflare_status") // pending, active, etc.
+  nameServers       String[]     @map("name_servers") @default([]) // Array of nameservers
+  workersDeployed   Boolean      @default(false) @map("workers_deployed") // True after worker domains have been deployed
+  sourceType        String       @default("MANUAL") @map("source_type") // MANUAL | UPLOAD
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+  
+  // Relations
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  website Website?
+  
+  @@index([userId])
+  @@index([domainName])
+  @@map("domains")
+}
+
+enum DomainStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+// ============================================
+// 3️⃣ WEBSITES TABLE
+// ============================================
+model Website {
+  id                 String   @id @default(uuid())
+  domainId           String   @unique @map("domain_id")
+  subdomain          String   @default("") // Auto-generated: chocolate.yourdomain.com
+  templateKey        String   @map("template_key") // templateA, templateB, etc.
+  adsEnabled         Boolean  @default(false) @map("ads_enabled")
+  adsApproved        Boolean  @default(false) @map("ads_approved")
+  contactFormEnabled Boolean  @default(true) @map("contact_form_enabled") // Toggle for contact form visibility
+  
+  // SEO & Social Metadata (for link previews & search engines)
+  metaTitle          String?  @map("meta_title") // Custom title for SEO & social sharing
+  metaDescription    String?  @map("meta_description") @db.Text // Custom description for SEO & social sharing
+  metaImage          String?  @map("meta_image") // Custom image URL for social sharing (og:image)
+  metaKeywords       String?  @map("meta_keywords") // SEO keywords (comma-separated)
+  metaAuthor         String?  @map("meta_author") // Website author/owner name
+  
+  // Social Media Links
+  instagramUrl       String?  @map("instagram_url") // Instagram profile URL
+  facebookUrl        String?  @map("facebook_url") // Facebook page URL
+  twitterUrl         String?  @map("twitter_url") // Twitter/X profile URL
+  
+  // Contact Information (for display on website)
+  contactEmail       String?  @map("contact_email") // Contact email to display on website
+  contactPhone       String?  @map("contact_phone") // Contact phone to display on website
+  
+  // Analytics
+  googleAnalyticsId  String?  @map("google_analytics_id") // Google Analytics Measurement ID (G-XXXXXXXXXX)
+  
+  // Logo
+  websiteLogo        String?  @map("website_logo") // Public URL of the uploaded logo
+  websiteLogoKey     String?  @map("website_logo_key") // S3 key for deletion when replacing logo
+  logoDisplayMode    String   @default("logo_only") @map("logo_display_mode") // "logo_only" | "text_only" | "both"
+  
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  domain Domain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  pages  Page[]
+  leads  Lead[]
+  
+  @@index([domainId])
+  @@index([subdomain])
+  @@map("websites")
+}
+
+// ============================================
+// 4️⃣ PAGES TABLE
+// ============================================
+model Page {
+  id             String  @id @default(uuid())
+  websiteId      String  @map("website_id")
+  slug           String  // "/", "/about", "/contact"
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description") @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  website  Website   @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  sections Section[]
+  
+  @@unique([websiteId, slug])
+  @@index([websiteId])
+  @@map("pages")
+}
+
+// ============================================
+// 5️⃣ SECTIONS TABLE
+// ============================================
+model Section {
+  id          String   @id @default(uuid())
+  pageId      String   @map("page_id")
+  sectionType String   @map("section_type") // hero, content, features, footer, etc.
+  orderIndex  Int      @map("order_index")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  page          Page           @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  contentBlocks ContentBlock[]
+  
+  @@index([pageId])
+  @@map("sections")
+}
+
+// ============================================
+// 6️⃣ CONTENT BLOCKS TABLE
+// ============================================
+model ContentBlock {
+  id              String   @id @default(uuid())
+  sectionId       String   @map("section_id")
+  blockType       String   @map("block_type") // text, image, video, etc.
+  contentJson     String   @map("content_json") @db.Text // Stores JSON data
+  aiPromptId      String?  @map("ai_prompt_id")
+  lastGeneratedAt DateTime? @map("last_generated_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  section          Section           @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  aiPrompt         AiPrompt?         @relation(fields: [aiPromptId], references: [id], onDelete: SetNull)
+  regenerationLogs RegenerationLog[]
+  
+  @@index([sectionId])
+  @@index([aiPromptId])
+  @@map("content_blocks")
+}
+
+// ============================================
+// 7️⃣ AI PROMPTS TABLE
+// ============================================
+model AiPrompt {
+  id          String       @id @default(uuid())
+  promptKey   String       @unique @map("prompt_key") // e.g., "hero_heading_templateA"
+  promptText  String       @map("prompt_text") @db.Text
+  promptType  PromptType   @map("prompt_type")
+  templateKey String       @map("template_key") // Which template this applies to
+  createdBy   String       @map("created_by") // SUPER_ADMIN user ID
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  
+  // Relations
+  contentBlocks ContentBlock[]
+  
+  @@index([templateKey])
+  @@index([promptKey])
+  @@map("ai_prompts")
+}
+
+enum PromptType {
+  TEXT
+  IMAGE
+  SEO
+}
+
+// ============================================
+// 8️⃣ LEADS TABLE
+// ============================================
+model Lead {
+  id        String   @id @default(uuid())
+  websiteId String   @map("website_id")
+  name      String
+  company   String?
+  email     String
+  message   String   @db.Text
+  leadType  String   @default("CONTACT") @map("lead_type") // CONTACT, ADS_INQUIRY
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  // Relations
+  website Website @relation(fields: [websiteId], references: [id], onDelete: Cascade)
+  
+  @@index([websiteId])
+  @@index([createdAt])
+  @@map("leads")
+}
+
+// ============================================
+// 9️⃣ APP SETTINGS TABLE (e.g. storage provider)
+// ============================================
+model AppSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique // e.g. "storage_provider"
+  value     String   @db.Text // e.g. "railway" | "cloudinary"
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}
+
+// ============================================
+// 1️⃣1️⃣ SUBSCRIPTION PLANS TABLE
+// ============================================
+model SubscriptionPlan {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  price           Float
+  creditsPerMonth Int      @map("credits_per_month")
+  maxWebsites     Int      @map("max_websites")
+  stripePriceId   String?  @map("stripe_price_id")
+  isCustom        Boolean  @default(false) @map("is_custom")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  subscriptions UserSubscription[]
+
+  @@map("subscription_plans")
+}
+
+// ============================================
+// 1️⃣2️⃣ USER SUBSCRIPTIONS TABLE
+// ============================================
+model UserSubscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique @map("user_id")
+  planId               String             @map("plan_id")
+  status               SubscriptionStatus @default(ACTIVE)
+  creditsRemaining     Int                @map("credits_remaining")
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  stripeCustomerId     String?            @map("stripe_customer_id")
+  currentPeriodStart   DateTime           @map("current_period_start")
+  currentPeriodEnd     DateTime           @map("current_period_end")
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@index([userId])
+  @@map("user_subscriptions")
+}
+
+// ============================================
+// 1️⃣3️⃣ CREDIT LEDGER TABLE
+// ============================================
+model CreditLedger {
+  id          String     @id @default(uuid())
+  userId      String     @map("user_id")
+  amount      Int
+  type        LedgerType
+  description String     @db.Text
+  domainId    String?    @map("domain_id")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("credit_ledger")
+}
+
+// ============================================
+// 1️⃣4️⃣ PAYMENT RECORDS TABLE
+// ============================================
+model PaymentRecord {
+  id               String        @id @default(uuid())
+  userId           String        @map("user_id")
+  stripeInvoiceId  String?       @unique @map("stripe_invoice_id")
+  stripeCheckoutId String?       @unique @map("stripe_checkout_id")
+  amount           Float
+  currency         String        @default("usd")
+  status           PaymentStatus
+  planId           String?       @map("plan_id")
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("payment_records")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING_PAYMENT
+  CANCELLED
+}
+
+enum LedgerType {
+  SUBSCRIPTION_CREDIT
+  BLOG_GENERATION
+  ADMIN_ADJUSTMENT
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+// ============================================
+// 1️⃣5️⃣ CUSTOM PLAN REQUESTS TABLE
+// ============================================
+model CustomPlanRequest {
+  id        String            @id @default(uuid())
+  userId    String            @map("user_id")
+  message   String            @db.Text
+  status    CustomPlanReqStatus @default(PENDING)
+  adminNote String?           @map("admin_note") @db.Text
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("custom_plan_requests")
+}
+
+enum CustomPlanReqStatus {
+  PENDING
+  REVIEWED
+  CLOSED
+}
+
+// ============================================
+// 🔟 REGENERATION LOGS TABLE
+// ============================================
+model RegenerationLog {
+  id             String   @id @default(uuid())
+  contentBlockId String   @map("content_block_id")
+  userId         String   @map("user_id")
+  generatedAt    DateTime @default(now()) @map("generated_at")
+  
+  // Relations
+  contentBlock ContentBlock @relation(fields: [contentBlockId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([contentBlockId])
+  @@index([userId])
+  @@map("regeneration_logs")
+}
+

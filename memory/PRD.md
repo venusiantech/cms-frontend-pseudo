@@ -4,7 +4,24 @@
 Create a clean and professional SaaS landing page for FASTOFY using Aceternity UI and shadcn/ui components. The app launches websites within minutes using AI-powered blog/article generation, allowing users to monetize unused domains.
 
 ## Latest Updates (Jan 2026)
-Enhanced with enterprise-level features: discount coupon system, free trials, money-back guarantee, trust credentials, live chat widget, and redesigned product showcase.
+- Enhanced landing page with enterprise-level features
+- Backend multi-provider AI integration complete
+
+## Backend Architecture
+- **Framework**: Express.js with TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **Queue**: Bull with Redis
+- **Storage**: S3/Cloudinary
+
+## AI Provider Integrations (NEW)
+1. **Aaddyy** (Default) - Full-featured AI with research-based content
+2. **Google Gemini** - High-quality content generation
+3. **OpenAI GPT** - GPT-5.2, GPT-5.1, GPT-4o models
+4. **Anthropic Claude** - Claude Sonnet 4.5, Claude 4 Sonnet
+5. **DeepAI** - Cost-effective AI for content and images
+6. **Rytr** - AI copywriting assistant
+7. **Stable Diffusion** - SDXL, SD3.0 image generation
+8. **Pexels** - Free stock photos
 
 ## Architecture
 - **Framework**: Next.js 14 with TypeScript

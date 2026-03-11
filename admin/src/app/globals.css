@@ -1,0 +1,387 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   FASTOFY ADMIN THEME - Dark Mode with Neon Accents
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Background colors */
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #0d0d0d;
+  --card-foreground: #ffffff;
+  --popover: #111111;
+  --popover-foreground: #a3a3a3;
+  
+  /* Primary - Neon Lime */
+  --primary: rgb(218, 255, 1);
+  --primary-foreground: #0a0a0a;
+  
+  /* Secondary */
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+  
+  /* Muted */
+  --muted: #171717;
+  --muted-foreground: #737373;
+  
+  /* Accent */
+  --accent: #1f1f1f;
+  --accent-foreground: #ffffff;
+  
+  /* Destructive */
+  --destructive: rgba(239, 68, 68, 0.2);
+  --destructive-foreground: #ef4444;
+  
+  /* Border */
+  --border: #262626;
+  --input: #1a1a1a;
+  --ring: rgb(218, 255, 1);
+  
+  /* Chart colors */
+  --chart-1: rgb(218, 255, 1);
+  --chart-2: rgb(52, 211, 153);
+  --chart-3: rgb(167, 139, 250);
+  --chart-4: rgb(251, 146, 60);
+  --chart-5: rgb(56, 189, 248);
+  
+  /* Sidebar */
+  --sidebar: #080808;
+  --sidebar-foreground: #a3a3a3;
+  --sidebar-primary: rgb(218, 255, 1);
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #171717;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1f1f1f;
+  --sidebar-ring: rgb(218, 255, 1);
+  
+  /* Typography */
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  
+  /* Radius */
+  --radius: 0.75rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  
+  /* Glow effects */
+  --glow-primary: 0 0 20px rgba(218, 255, 1, 0.15);
+  --glow-success: 0 0 20px rgba(52, 211, 153, 0.15);
+  --glow-error: 0 0 20px rgba(239, 68, 68, 0.15);
+}
+
+/* Keep dark as default (no light mode) */
+.dark {
+  /* Same as root - always dark */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+}
+
+@layer components {
+  /* ─── Buttons ─────────────────────────────────────────────────────────────── */
+  
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200;
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  
+  .btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: var(--glow-primary);
+  }
+  
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    border: 1px solid var(--border);
+  }
+  
+  .btn-secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
+    background: var(--destructive);
+    color: var(--destructive-foreground);
+  }
+  
+  .btn-danger:hover {
+    opacity: 0.9;
+    box-shadow: var(--glow-error);
+  }
+
+  /* ─── Input Fields ────────────────────────────────────────────────────────── */
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl text-sm transition-all duration-200;
+    background: var(--input);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+  }
+  
+  .input-field::placeholder {
+    color: var(--muted-foreground);
+  }
+  
+  .input-field:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(218, 255, 1, 0.1);
+  }
+
+  /* ─── Cards ───────────────────────────────────────────────────────────────── */
+  
+  .card {
+    @apply rounded-2xl p-6;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+  
+  .card-hover {
+    @apply card transition-all duration-200;
+  }
+  
+  .card-hover:hover {
+    border-color: rgba(218, 255, 1, 0.3);
+    box-shadow: var(--glow-primary);
+  }
+
+  /* ─── Badges ──────────────────────────────────────────────────────────────── */
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .badge-green {
+    background: rgba(52, 211, 153, 0.15);
+    color: rgb(52, 211, 153);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+  }
+  
+  .badge-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: rgb(239, 68, 68);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+  
+  .badge-yellow {
+    background: rgba(250, 204, 21, 0.15);
+    color: rgb(250, 204, 21);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+  }
+  
+  .badge-blue {
+    background: rgba(56, 189, 248, 0.15);
+    color: rgb(56, 189, 248);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+  }
+  
+  .badge-purple {
+    background: rgba(167, 139, 250, 0.15);
+    color: rgb(167, 139, 250);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+  }
+  
+  .badge-primary {
+    background: rgba(218, 255, 1, 0.15);
+    color: rgb(218, 255, 1);
+    border: 1px solid rgba(218, 255, 1, 0.25);
+  }
+
+  /* ─── Tables ──────────────────────────────────────────────────────────────── */
+  
+  .table-row {
+    @apply border-b border-border transition-colors;
+  }
+  
+  .table-row:hover {
+    background: rgba(218, 255, 1, 0.02);
+  }
+  
+  .table-cell {
+    @apply px-4 py-3 text-sm;
+  }
+
+  /* ─── Stat Cards ──────────────────────────────────────────────────────────── */
+  
+  .stat-card {
+    @apply rounded-2xl p-5 transition-all duration-200;
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+  
+  .stat-card:hover {
+    border-color: rgba(218, 255, 1, 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* ─── Glow Effects ────────────────────────────────────────────────────────── */
+  
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+  
+  .glow-success {
+    box-shadow: var(--glow-success);
+  }
+  
+  .glow-error {
+    box-shadow: var(--glow-error);
+  }
+
+  /* ─── Spotlight Effect ────────────────────────────────────────────────────── */
+  
+  .spotlight {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(218, 255, 1, 0.06),
+      transparent 40%
+    );
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+}
+
+/* ─── Animations ────────────────────────────────────────────────────────────── */
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(218, 255, 1, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(218, 255, 1, 0.4);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(218, 255, 1, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
